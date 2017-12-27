@@ -18,10 +18,10 @@ Then edit makefile.config according to your requirements.
 
 ### 1.3 Prepare caffe
 
-If you are not on an arm64 target, it is necessary to build [Caffe](https://github.com/BVLC/caffe) or [CaffeOnACL](https://github.com/OAID/CaffeOnACL), and set the path of caffe to `CAFFE_ROOT` in makefile.config.<br>
+If you are not on an arm64 target, it is necessary to build [Caffe](https://github.com/BVLC/caffe) or [CaffeOnACL](https://github.com/OAID/CaffeOnACL), and set the path of caffe to `CAFFE_ROOT` in `makefile.config`.<br>
 For example:
 
->CAFFE_ROOT = /home/firefly/caffe
+	CAFFE_ROOT = /home/firefly/caffe
 
 ## 2. Build
 
@@ -30,7 +30,7 @@ For example:
 	make
 	make test
 
-`make test` is optional, 
+`make test` is optional, and only executed when you need to build and run some additional test programs.
 
 ## 3. Test
-Please refer to [benchmark](./benchmark.md).
+Please refer to the doc of [benchmark](./benchmark.md).
