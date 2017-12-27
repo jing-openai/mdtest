@@ -7,7 +7,7 @@ The serializer module loads the whole model file stored in disk, and creates a T
 The serializer module can be built as a dynamic library and can be loaded on the fly.
 
 The seciont 2, class serializer, introduces interfaces that the developer should implemented.
-The Serializer module's load method **MUST** be MT-Safe: multiple threads can call the load method simultaneously. It is safe to assume that there is only ONE instance for a serializer module in system.
+The Serializer module's load method **MUST** be MT-Safe: multiple threads can call the load method simultaneously. It is safe to assume that there is only **ONE** instance for a serializer module in system.
 
 ## 2. Class Serializer
 All serializer module must be derived from class serializer. One serializer class should only implement one AI framework model load. While for a AI framework, it is possible that there are different serializer modules.
@@ -34,7 +34,7 @@ const std::string& GetName(void);
 bool RegisterOpLoadMethod(const std::string& op_name,const any& load_func);
 any& GetOpLoadMethod(const std::string& op_name);
 ```
-Register operator load function for operator model_op. This enables developer to implement operator load function outside the serializer module.
+Register operator load function for operator op_name. This enables developer to implement operator load function outside the serializer module.
 
 ### 2.4 Optional Helper Function
 Const tensor reload helper:
@@ -52,7 +52,7 @@ SerializerPtr p_onnx;
 SerializerManager::SafeGet("onnx", p_onnx);
 p_onnx->LoadModel(flist, graph);
 ```
-Each serializer module should register an object into SerializerManager during initialization phase. As it is requested that the serializer load method is MT-Safe, only ONE serializer object is enough for whole system.
+Each serializer module should register an object into SerializerManager during initialization phase. As it is requested that the serializer load method is MT-Safe, only **ONE** serializer object is enough for whole system.
 
 Here is an example work follow of creating and registering a serializer object. It is optional to use SerializerFactory to create a serializer object.
 ```c++
