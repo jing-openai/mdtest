@@ -1,4 +1,3 @@
-
 # TEngine Serializer Develop Guide
 
 ## 1. Overview
@@ -15,8 +14,8 @@ The interfaces of class serializer can be classified into below categories:
 
 ### 2.1 Load Interface
 ``` c++
-int GetFileNum(void);
-bool LoadModel(const std::vector<std::string>& file_list, StaticGraph * static_graph);
+unsigned int GetFileNum(void);
+bool LoadModel(const std::vector<std::string>& file_list, StaticGraph * graph);
 ```
 GetFileNum() will return the number of files that need to load a model.<br>
 LoadModel() will do all the work to parse the saved model and convert it to StaticGraph. The static_graph is created by the caller in advance.
@@ -30,35 +29,36 @@ const std::string& GetName(void);
 
 ### 2.3 Helper Function: Operator Load Function Registry
 ```c++
-bool RegisterOpLoadMethod(const std::string& model_op,const any& load_func);
-const any& GetOpLoadMethod(const std::string& model_op);
+bool RegisterOpLoadMethod(const std::string& op_name,const any& load_func);
+any& GetOpLoadMethod(const std::string& op_name);
 ```
 Register operator load function for operator model_op. This enables developer to implement operator load function outside the serializer module.
 
 ### 2.4 Optional Helper Function
 Const tensor reload helper:
 ```c++
-bool LoadConstTensor(const std::string& fname, StaticConstTensor * const_tensor);
-bool LoadConstTensor(int fd, StaticConstTensor * const_tensor);
+bool LoadConstTensor(const std::string& fname, StaticTensor * const_tensor);
+bool LoadConstTensor(int fd, StaticTensor * const_tensor);
 ```
 The developer can use GetTensorName() to get the tensor name. The memory to hold the tensor data should be allocated by those functions and the memory owner will be transfered to the framework.
 
 ## 3. SerializerFactory and Serializer Object Manager Interface
-The user of the serializer module will get a serializer object through SerializerObjectManager. 
+The user of the serializer module will get a serializer object through SerializerManager. 
 For example:
 ```c++
-Serializer * p_caffe=SerializerManager::Get("caffe");
-p_caffe->LoadModel(flist,graph);
+SerializerPtr p_onnx;
+SerializerManager::SafeGet("onnx", p_onnx);
+p_onnx->LoadModel(flist, graph);
 ```
 Each serializer module should register an object into SerializerManager during initialization phase. As it is requested that the serializer load method is MT-Safe, only ONE serializer object is enough for whole system.
 
 Here is an example work follow of creating and registering a serializer object. It is optional to use SerializerFactory to create a serializer object.
 ```c++
 auto factory=SerializerFactory::GetFactory();
-factory->RegisterInterface<CaffeSerializer>("caffe");
+factory->RegisterInterface<OnnxSerializer>("onnx");
 
-auto caffe_serializer=factory->Create("caffe");
-SerializerManager::Add("caffe",caffe_serializer);
+auto onnx_serializer=factory->Create("onnx");
+SerializerManager::SafeAdd("onnx",SerializerPtr(onnx_serializer));
 ```
 
 ## 4. Static Graph API
@@ -84,6 +84,8 @@ static bool  LoadCaffeConcat(StaticGraph * graph, StaticNode * node,
     const caffe::ConcatParameter& concat_param=layer_param.concat_param();
     if(concat_param.has_concat_dim())
         param.axis=static_cast<int>(concat_param.concat_dim());
+    else
+        param.axis=concat_param.axis();
     StaticOp * op=CreateStaticOp(graph, "Concat");
     SetOperatorParam(op, param);
     SetNodeOp(node, op);
@@ -123,8 +125,8 @@ void AddOperatorAttr(StaticOp * op, const std::string& attr_name, any&& val);
 
 ### 4.4 StaticTensor API
 ```c++
-StaticTensor * CreateStaticTensor(StaticGraph * grap, const std::string& name);
-StaticTensor * CreateStaticConstTensor(StaticGraph * grap, const std::string& name);
+StaticTensor * CreateStaticTensor(StaticGraph * graph, const std::string& name);
+StaticTensor * CreateStaticConstTensor(StaticGraph * graph, const std::string& name);
 void  SetTensorDim(StaticTensor * tensor, const std::vector<int>& dims);
 void  SetTensorDataType(StaticTensor * tensor, const std::string& data_type);
 void  SetTensorDataLayout(StaticTensor * tensor, const std::string& data_layout);
@@ -139,10 +141,10 @@ const std::string& GetTensorName(StaticTensor * tensor);
 
 Here are the major external header files necessary to develop a serializer module.
 
-    serializer.hpp        :  the Serializer Interface as well as the SerializerManager
+    serializer.hpp  :  the Serializer Interface as well as the SerializerManager
     operator_manager.hpp  :  OpManager::GetOpDefParam
-    static_graph_api.hpp  :  static graph API
-    operator/xxx_param.hpp:  Operator parameter
+    static_graph_interface.hpp  :  static graph interface
+    operator/xxx_param.hpp  :  Operator parameter
 
 ## 6. Example code
 
