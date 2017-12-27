@@ -1,29 +1,12 @@
 
 # TEngine Serializer Develop Guide
 
-
-## 目录
-> 1. Overview
-> 2. Class Serializer
->> 2.1 Load Interface
->> 2.2 Information Interface<br>
->> 2.3 Helper Function: Operator Load Function Registry<br>
->> 2.4 Optional Helper Function<br>
-> 3. SerializerFactory and Serializer Object Manager Interface<br>
-> 4. Static Graph API<br>
->> 4.1 StaticGraph API<br>
->> 4.2 StaticNode API<br>
->> 4.3 StaticOp API<br>
->> 4.4 StaticTensor API<br>
-> 5. Major Header files<br>
-> 6. Example code<br>
-
 ## 1. Overview
 This document defines the APIs and requirements to develop a serializer module for TEngine. Each serializer module works on one specific model format only, such ONNX/Caffe/Caffe2/Mxnet. The serializer module loads the whole model file stored in disk, and creates a TEngine in-memory IR, which is StaticGraph. The serializer module also can store the StaticGraph into disk in the specific format. However, current version of this document describes the loading process, which is more important than the storing process.
 
 The serializer module can be built as a dynamic library and can be loaded on the fly.
 The seciont 2, class serializer, introduces interfaces that the developer should implemented.
-The Serializer module's load method MUST be MT-Safe: multiple threads can call the load method simultaneously. It is safe to assume that there is only ONE instance for a serializer module in system.
+The Serializer module's load method **MUST** be MT-Safe: multiple threads can call the load method simultaneously. It is safe to assume that there is only ONE instance for a serializer module in system.
 
 ## 2. Class Serializer
 All serializer module must be derived from class serializer. One serializer class should only implement one AI framework model load. While for a AI framework, it is possible that there are different serializer modules.
@@ -35,7 +18,7 @@ The interfaces of class serializer can be classified into below categories:
 int GetFileNum(void);
 bool LoadModel(const std::vector<std::string>& file_list, StaticGraph * static_graph);
 ```
-GetFileNum() will return the number of files that need to load a model.
+GetFileNum() will return the number of files that need to load a model.<br>
 LoadModel() will do all the work to parse the saved model and convert it to StaticGraph. The static_graph is created by the caller in advance.
 
 ### 2.2 Information Interface
@@ -53,7 +36,7 @@ const any& GetOpLoadMethod(const std::string& model_op);
 Register operator load function for operator model_op. This enables developer to implement operator load function outside the serializer module.
 
 ### 2.4 Optional Helper Function
-const tensor reload helper
+Const tensor reload helper:
 ```c++
 bool LoadConstTensor(const std::string& fname, StaticConstTensor * const_tensor);
 bool LoadConstTensor(int fd, StaticConstTensor * const_tensor);
@@ -73,7 +56,7 @@ Here is an example work follow of creating and registering a serializer object. 
 ```c++
 auto factory=SerializerFactory::GetFactory();
 factory->RegisterInterface<CaffeSerializer>("caffe");
-        
+
 auto caffe_serializer=factory->Create("caffe");
 SerializerManager::Add("caffe",caffe_serializer);
 ```
@@ -81,11 +64,12 @@ SerializerManager::Add("caffe",caffe_serializer);
 ## 4. Static Graph API
 The static graph is TEngine in-memory IR and it is opaque to serializer module developer. 
 Four components are defined as the forward declaration and are manipulated through the static graph AI.
-
-    struct StaticGraph;
-    struct StaticNode;
-    struct StaticTensor;
-    struct StaticOp;
+```c++
+struct StaticGraph;
+struct StaticNode;
+struct StaticTensor;
+struct StaticOp;
+```
 
 The description below only covers the loading process. 
 
@@ -100,9 +84,9 @@ static bool  LoadCaffeConcat(StaticGraph * graph, StaticNode * node,
     const caffe::ConcatParameter& concat_param=layer_param.concat_param();
     if(concat_param.has_concat_dim())
         param.axis=static_cast<int>(concat_param.concat_dim());
-    StaticOp * op=CreateStaticOp(graph,"Concat");
-    SetOperatorParam(op,param);
-    SetNodeOp(node,op);
+    StaticOp * op=CreateStaticOp(graph, "Concat");
+    SetOperatorParam(op, param);
+    SetNodeOp(node, op);
     return true;
 }
 ```
@@ -112,9 +96,9 @@ The sections followed will list the API in detail. Please note that the serializ
 ### 4.1 StaticGraph API
 ```c++
 void DumpStaticGraph(StaticGraph * graph);
-bool CheckGraphIntegraity (StaticGraph *graph);
+bool CheckGraphIntegraity (StaticGraph * graph);
 void SetGraphInternalName(StaticGraph * graph, const std::string& name);
-void SetGraphIdentity(StaticGraph * graph, const std::string& domain, const std::string&name, const std::string& version);
+void SetGraphIdentity(StaticGraph * graph, const std::string& domain, const std::string& name, const std::string& version);
 void SetGraphSource(StaticGraph * graph, const std::string& source);
 void SetGraphSourceFormat(StaticGraph * graph, const std::string& format);
 void SetGraphConstTensorFile(StaticGraph * graph, const std::string& fname);
@@ -124,7 +108,7 @@ bool AddGraphAttr(StaticGraph * graph, const std::string& attr_name, any&& value
 ### 4.2 StaticNode API
 ```c++
 StaticNode * CreateStaticNode(StaticGraph * graph, const std::string& node_name);
-void SetNodeOp(StaticNode * node, StaticOp* op);
+void SetNodeOp(StaticNode * node, StaticOp * op);
 int AddNodeInputTensor(StaticNode * node, StaticTensor * tensor);
 int AddNodeOutputTensor(StaticNode * node, StaticTensor * tensor);
 const std::string& GetNodeName(StaticNode * node);
@@ -133,19 +117,19 @@ const std::string& GetNodeName(StaticNode * node);
 ### 4.3 StaticOp API
 ```c++
 StaticOp * CreateStaticOp(StaticGraph * graph, const std::string& op_name);
-void SetOperatorParam(StaticOp*, any&& param);
-void AddOperatorAttr(StaticOp*, const std::string& attr_name, any&& val);
+void SetOperatorParam(StaticOp * op, any&& param);
+void AddOperatorAttr(StaticOp * op, const std::string& attr_name, any&& val);
 ```
 
 ### 4.4 StaticTensor API
 ```c++
 StaticTensor * CreateStaticTensor(StaticGraph * grap, const std::string& name);
 StaticTensor * CreateStaticConstTensor(StaticGraph * grap, const std::string& name);
-void  SetTensorDim(StaticTensor * , const std::vector<int>& dims);
-void  SetTensorDataType(StaticTensor *, const std::string& data_type);
-void  SetTensorDataLayout(StaticTensor *, const std::string& data_layout);
-void  SetTensorType(StaticTensor *, int type); 
-int   SetTensorSize(StaticTensor *, int size);
+void  SetTensorDim(StaticTensor * tensor, const std::vector<int>& dims);
+void  SetTensorDataType(StaticTensor * tensor, const std::string& data_type);
+void  SetTensorDataLayout(StaticTensor * tensor, const std::string& data_layout);
+void  SetTensorType(StaticTensor * tensor, int type); 
+int   SetTensorSize(StaticTensor * tensor, int size);
 void  SetConstTensorBuffer(StaticTensor * tensor, void * addr);
 void  SetConstTensorFileLocation(StaticTensor * tensor, int offset, int file_size);
 const std::string& GetTensorName(StaticTensor * tensor);
