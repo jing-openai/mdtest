@@ -1,9 +1,11 @@
 # TEngine Serializer Develop Guide
 
 ## 1. Overview
-This document defines the APIs and requirements to develop a serializer module for TEngine. Each serializer module works on one specific model format only, such ONNX/Caffe/Caffe2/Mxnet. The serializer module loads the whole model file stored in disk, and creates a TEngine in-memory IR, which is StaticGraph. The serializer module also can store the StaticGraph into disk in the specific format. However, current version of this document describes the loading process, which is more important than the storing process.
-
+This document defines the APIs and requirements to develop a serializer module for TEngine. 
+Each serializer module works on one specific model format only, such ONNX/Caffe/Caffe2/Mxnet. 
+The serializer module loads the whole model file stored in disk, and creates a TEngine in-memory IR, which is StaticGraph. The serializer module also can store the StaticGraph into disk in the specific format. However, current version of this document describes the loading process, which is more important than the storing process.
 The serializer module can be built as a dynamic library and can be loaded on the fly.
+
 The seciont 2, class serializer, introduces interfaces that the developer should implemented.
 The Serializer module's load method **MUST** be MT-Safe: multiple threads can call the load method simultaneously. It is safe to assume that there is only ONE instance for a serializer module in system.
 
@@ -15,7 +17,7 @@ The interfaces of class serializer can be classified into below categories:
 ### 2.1 Load Interface
 ``` c++
 unsigned int GetFileNum(void);
-bool LoadModel(const std::vector<std::string>& file_list, StaticGraph * graph);
+bool LoadModel(const std::vector<std::string>& file_list, StaticGraph * static_graph);
 ```
 GetFileNum() will return the number of files that need to load a model.<br>
 LoadModel() will do all the work to parse the saved model and convert it to StaticGraph. The static_graph is created by the caller in advance.
@@ -43,7 +45,7 @@ bool LoadConstTensor(int fd, StaticTensor * const_tensor);
 The developer can use GetTensorName() to get the tensor name. The memory to hold the tensor data should be allocated by those functions and the memory owner will be transfered to the framework.
 
 ## 3. SerializerFactory and Serializer Object Manager Interface
-The user of the serializer module will get a serializer object through SerializerManager. 
+The user of the serializer module will get a serializer object through SerializerManager. <br>
 For example:
 ```c++
 SerializerPtr p_onnx;
