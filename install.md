@@ -16,9 +16,9 @@
 
 Then edit makefile.config according to your requirements. 
 
-### 1.3 Prepare caffe
+### 1.3 Prepare caffe (Optional)
 
-If you are not on an arm64 target, it is necessary to build [Caffe](https://github.com/BVLC/caffe) or [CaffeOnACL](https://github.com/OAID/CaffeOnACL), and set the path of caffe to `CAFFE_ROOT` in `makefile.config`.<br>
+If you want to use caffe's operators, build [Caffe](https://github.com/BVLC/caffe) or [CaffeOnACL](https://github.com/OAID/CaffeOnACL), and set the path of caffe to `CAFFE_ROOT` in `makefile.config`.<br>
 For example:
 
 	CAFFE_ROOT = /home/firefly/caffe
@@ -28,9 +28,10 @@ For example:
 	cd ~/tengine
 	
 	make
-	make test
+	
+	make test (Optional)
 
-`make test` is optional, and only executed when you need to build and run some additional test programs.
+`make test` is executed when you need to build and run some additional test programs in the project.
 
 ## 3. Test
-Please refer to the doc of [benchmark](./benchmark.md).
+Please refer to the documentation of [benchmark](./benchmark.md).
