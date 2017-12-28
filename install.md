@@ -6,7 +6,8 @@ This guide page gives instructions on how to build and test TEngine on your syst
 
 ### 1.1 Download source code
 
-To get started, clone the latest TEngine repository. It is important to specify the `--recursive` option to clone the submodules along.
+To get started, clone the latest TEngine repository. <br>
+It is important to specify the `--recursive` option to clone the submodules along.
 
 	cd ~
 	
@@ -41,7 +42,7 @@ For example:
 
 ## 3. Run tests
 
-TEngine provides some example test progrrams for you to easily validate whether the build is successfully done.
+TEngine also provides you some example programs for tests, and you can easily validate whether your TEngine is successfully built by running them.
 
 ### 3.1 Run SqueezeNet
 
@@ -49,7 +50,7 @@ TEngine provides some example test progrrams for you to easily validate whether 
 	
 	./build/tests/bin/test_sqz
 
-Output message:
+Output message of classification:
 
 	0.2763 - "n02123045 tabby, tabby cat"
 	0.2673 - "n02123159 tiger cat"
@@ -63,7 +64,7 @@ Output message:
 	
 	./build/tests/bin/test_sqz
 
-Output message:
+Output message of classification:
 
 	8.5976 - "n02123159 tiger cat"
 	7.9550 - "n02119022 red fox, Vulpes vulpes"
@@ -71,4 +72,4 @@ Output message:
 	7.4274 - "n02113023 Pembroke, Pembroke Welsh corgi"
 	6.3647 - "n02123045 tabby, tabby cat"
 
-For more information about the performance test of TEngine, please refer to the documentation of [benchmark](./benchmark.md).
+For more information about the performance test of TEngine, please refer to the documentation of [benchmark](benchmark.md).
