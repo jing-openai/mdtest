@@ -21,13 +21,14 @@ It is important to specify the `--recursive` option to clone the submodules alon
 	
 	cp etc/config.example etc/config
 
-Then edit makefile.config and etc/config according to your specific requirements.
+Then edit `makefile.config` and `etc/config` according to your specific requirements.
 
 ### 1.3 Prepare caffe (Optional)
 
 If you want to use caffe's operators in TEngine, please build [Caffe](https://github.com/BVLC/caffe) or [CaffeOnACL](https://github.com/OAID/CaffeOnACL) in advance and set the path of caffe to `CAFFE_ROOT` in `makefile.config`.<br>
 For example:
 
+	CONFIG_CAFFE_REF=y
 	CAFFE_ROOT = /home/firefly/caffe
 
 ## 2. Build
@@ -50,7 +51,7 @@ TEngine also provides you some example programs for tests, and you can easily va
 	
 	./build/tests/bin/test_sqz
 
-Output message of classification:
+Output message:
 
 	0.2763 - "n02123045 tabby, tabby cat"
 	0.2673 - "n02123159 tiger cat"
@@ -64,7 +65,7 @@ Output message of classification:
 	
 	./build/tests/bin/test_sqz
 
-Output message of classification:
+Output message:
 
 	8.5976 - "n02123159 tiger cat"
 	7.9550 - "n02119022 red fox, Vulpes vulpes"
