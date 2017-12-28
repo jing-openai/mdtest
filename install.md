@@ -1,6 +1,6 @@
 # Installation Guide
 
-This guide page gives instructions on how to build and test TEngine on your system.
+This guide gives instructions on how to build and test TEngine on your system.
 
 ## 1. Preparation
 
@@ -8,10 +8,6 @@ This guide page gives instructions on how to build and test TEngine on your syst
 
 To get started, clone the latest TEngine repository. <br>
 It is important to specify the `--recursive` option to clone the submodules along.
-
-	cd ~
-	
-	git clone --recursive gitlab@219.139.34.186:openailab/tengine.git
 
 ### 1.2 Prepare config files
 
@@ -21,7 +17,7 @@ It is important to specify the `--recursive` option to clone the submodules alon
 	
 	cp etc/config.example etc/config
 
-Then edit `makefile.config` and `etc/config` according to your specific requirements.
+By default, `CONFIG_ARCH_ARM64` option is valid, and `CONFIG_CAFFE_REF`, `CAFFE_ROOT`, `CONFIG_EVENT_EXECUTOR` are commented in `makefile.config`. If your target is arm arch, and you don't want to use caffe's operators and event executor, you can directly build TEngine by `make` without doing any change to `makefile.config`. Otherwise, please edit `makefile.config` according to your specific requirements.
 
 ### 1.3 Prepare caffe (Optional)
 
@@ -43,7 +39,7 @@ For example:
 
 ## 3. Run tests
 
-TEngine also provides you some example programs for tests, and you can easily validate whether your TEngine is successfully built by running them.
+TEngine also provides some example programs for tests, and you can easily validate whether your TEngine is successfully built by running these test programs and inspecting the results.
 
 ### 3.1 Run SqueezeNet
 
@@ -63,7 +59,7 @@ Output message:
 
 	cd ~/tengine
 	
-	./build/tests/bin/test_sqz
+	./build/tests/bin/test_mobilenet
 
 Output message:
 
